@@ -1,7 +1,8 @@
 from fastapi import FastAPI
 import csv
-
+from app.scraper import run_scraper
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 
 app = FastAPI()
 
@@ -14,16 +15,35 @@ app.add_middleware(
 )
 
 
+class URLRequest(BaseModel):
+    url:str
+
 @app.get("/data")
 def get_data():
 
     result = []
 
-    with open("data/data.csv", newline="", encoding="utf-8") as f:
+    try:
 
-        reader = csv.DictReader(f)
+         with open("data/data.csv", newline="", encoding="utf-8") as f:
 
-        for row in reader:
-            result.append(row)
+            reader = csv.DictReader(f)
+
+            for row in reader:
+                result.append(row)
+
+    except FileNotFoundError:
+        return []
+
 
     return result
+
+
+@app.post("/scrape")
+async def scrape_url(request:URLRequest):
+
+    data = await run_scraper(request.url)
+    return data
+
+
+

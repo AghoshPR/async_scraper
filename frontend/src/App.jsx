@@ -4,30 +4,43 @@ import axios from "axios";
 const App = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [url, setUrl] = useState([]);
 
-  useEffect(() => {
-    axios;
+  const handleScrape = () => {
+    if (!url) return;
+
+    setLoading(true);
+
     axios
-      .get("http://127.0.0.1:8000/data")
+      .post("http://127.0.0.1:8000/scrape", { url })
       .then((res) => {
+        const responseData = res.data || [];
         setData(res.data);
-        console.log("API DATA:", res.data);
-
-        setLoading(false); //
+        setLoading(false);
       })
       .catch((err) => {
-        console.log("Error:", err);
-        setLoading(false); //
+        console.log(err);
+        setLoading(false);
       });
-  }, []);
+  };
 
   return (
     <div style={{ padding: "20px" }}>
       <h1>Scraped Data</h1>
 
+      <input
+        type="text"
+        placeholder="Enter Website URL"
+        value={url}
+        onChange={(e) => setUrl(e.target.value)}
+        style={{ width: "300px", marginRight: "10px" }}
+      />
+
+      <button onClick={handleScrape}>Click</button>
+
       {loading ? (
         <p>Loading...</p>
-      ) : data.length === 0 ? (
+      ) : !data || data.length === 0 ? (
         <p>No data available</p>
       ) : (
         <table border="1" cellPadding="10">

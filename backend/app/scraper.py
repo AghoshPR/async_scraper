@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 
 DATA_FILE = "data/data.csv"
 
-URL = "https://news.ycombinator.com/"
+# URL = "https://news.ycombinator.com/"
 
 
 async def fetch(session, url):
@@ -39,14 +39,14 @@ def parse_html(html):
     return data
 
 
-async def main():
+async def run_scraper(url):
 
     async with aiohttp.ClientSession() as session:
 
-        html = await fetch(session,URL)
+        html = await fetch(session,url)
 
         if not html:
-            return 
+            return []
         
         results = parse_html(html)
 
@@ -61,6 +61,5 @@ async def main():
             for item in results:
                 if item:
                     writer.writerow([item["id"], item["title"]])
+        return results
 
-if __name__ == "__main__":
-    asyncio.run(main())
