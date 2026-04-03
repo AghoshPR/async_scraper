@@ -2,14 +2,11 @@ import asyncio
 import aiohttp
 import csv
 import os
+from bs4 import BeautifulSoup
 
 DATA_FILE = "data/data.csv"
 
-URLS = [
-    "https://jsonplaceholder.typicode.com/posts/1",
-    "https://jsonplaceholder.typicode.com/posts/2",
-    "https://jsonplaceholder.typicode.com/posts/3",
-]
+URL = "https://news.ycombinator.com/"
 
 
 async def fetch(session, url):
@@ -18,19 +15,41 @@ async def fetch(session, url):
 
         async with session.get(url, timeout=5) as response:
 
-            return await response.json()
+            return await response.text()
 
     except Exception as e:
         print(f"Error:{e}")
         return None
 
 
+def parse_html(html):
+    soup = BeautifulSoup(html, "html.parser")
+
+    titles = soup.find_all("span", class_="titleline")
+
+    data = []
+
+    for index, item in enumerate(titles, start=1):
+
+        title = item.text
+        data.append({
+            "id": index,
+            "title": title
+        })
+    return data
+
+
 async def main():
 
     async with aiohttp.ClientSession() as session:
 
-        tasks = [fetch(session, url) for url in URLS]
-        results = await asyncio.gather(*tasks)
+        html = await fetch(session,URL)
+
+        if not html:
+            return 
+        
+        results = parse_html(html)
+
 
         os.makedirs("data", exist_ok=True)
 
