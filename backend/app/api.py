@@ -17,6 +17,7 @@ app.add_middleware(
 
 class URLRequest(BaseModel):
     url:str
+    selector : str
 
 @app.get("/data")
 def get_data():
@@ -42,7 +43,7 @@ def get_data():
 @app.post("/scrape")
 async def scrape_url(request:URLRequest):
 
-    data = await run_scraper(request.url)
+    data = await run_scraper(request.url,request.selector)
     return data
 
 

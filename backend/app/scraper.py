@@ -22,34 +22,38 @@ async def fetch(session, url):
         return None
 
 
-def parse_html(html):
+def parse_html(html, selector):
     soup = BeautifulSoup(html, "html.parser")
 
-    titles = soup.find_all("span", class_="titleline")
+    if not selector or selector.strip() == "":
+        return []
+
+    elements = soup.select(selector)
 
     data = []
 
-    for index, item in enumerate(titles, start=1):
+    for index, item in enumerate(elements, start=1):
+        text = item.get_text(strip=True)
 
-        title = item.text
-        data.append({
-            "id": index,
-            "title": title
-        })
+        if text:
+
+            data.append({
+                "id": index,
+                "title": text
+            })
     return data
 
 
-async def run_scraper(url):
+async def run_scraper(url, selector):
 
     async with aiohttp.ClientSession() as session:
 
-        html = await fetch(session,url)
+        html = await fetch(session, url)
 
         if not html:
             return []
-        
-        results = parse_html(html)
 
+        results = parse_html(html, selector)
 
         os.makedirs("data", exist_ok=True)
 
@@ -62,4 +66,3 @@ async def run_scraper(url):
                 if item:
                     writer.writerow([item["id"], item["title"]])
         return results
-

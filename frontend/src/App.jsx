@@ -4,7 +4,8 @@ import axios from "axios";
 const App = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [url, setUrl] = useState([]);
+  const [url, setUrl] = useState("");
+  const [selector, setSelector] = useState("");
 
   const handleScrape = () => {
     if (!url) return;
@@ -12,7 +13,10 @@ const App = () => {
     setLoading(true);
 
     axios
-      .post("http://127.0.0.1:8000/scrape", { url })
+      .post("http://127.0.0.1:8000/scrape", {
+        url:url,
+        selector:selector
+      })
       .then((res) => {
         const responseData = res.data || [];
         setData(res.data);
@@ -34,6 +38,13 @@ const App = () => {
         value={url}
         onChange={(e) => setUrl(e.target.value)}
         style={{ width: "300px", marginRight: "10px" }}
+      />
+
+      <input
+        type="text"
+        placeholder="Enter CSS selector (e.g. h2, .titleline)"
+        value={selector}
+        onChange={(e) => setSelector(e.target.value)}
       />
 
       <button onClick={handleScrape}>Click</button>
